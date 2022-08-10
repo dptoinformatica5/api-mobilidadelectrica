@@ -16,11 +16,11 @@ module.exports.signup = (req, res) => {
           .status(200)
           .send({ success: true, message: "successfully signed up" });
       })
-      .catch((error) =>
-        res.status(200).send({ success: false, error: error.message })
+      .catch((err) =>
+        res.status(200).send({ success: false, error: err.message })
       );
-  } catch (error) {
-    res.status(500).send({ success: false, error: error.message });
+  } catch (err) {
+    res.status(500).send({ success: false, error: err.message });
   }
 };
 
@@ -38,11 +38,11 @@ module.exports.getUsers = (req, res) => {
           .status(200)
           .send({ success: true, message: "successfully", data: users });
       })
-      .catch((error) =>
-        res.status(200).send({ success: false, error: error.message })
+      .catch((err) =>
+        res.status(200).send({ success: false, error: err.message })
       );
-  } catch (error) {
-    res.status(500).send({ success: false, error: error.message });
+  } catch (err) {
+    res.status(500).send({ success: false, error: err.message });
   }
 };
 
@@ -88,5 +88,26 @@ module.exports.getUserById = (req, res) => {
     .then((user) => {
       res.status(200).send({ success: true, data: { user } });
     })
-    .catch((err) => res.status(200).send({ success: false, err: err.message }));
+    .catch((err) =>
+      res.status(200).send({ success: false, error: err.message })
+    );
+};
+
+module.exports.confirmAccount = (req, res) => {
+  const User = getModelByName("user");
+
+  try {
+    //le pasamos el token
+    User.confirmAccount(req.params.token)
+      .then(() => {
+        res
+          .status(200)
+          .send({ success: true, message: "account confirmed successfully" });
+      })
+      .catch((err) =>
+        res.status(200).send({ success: false, error: err.message })
+      );
+  } catch (err) {
+    res.status(200).send({ success: false, error: err.message });
+  }
 };

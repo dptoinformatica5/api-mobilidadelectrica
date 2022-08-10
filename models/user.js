@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const { isValidEmail } = require("../helpers");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 const UserSquema = mongoose.Schema({
   email: {
@@ -27,6 +28,7 @@ UserSquema.statics.testing = testing;
 UserSquema.statics.getUsers = getUsers;
 UserSquema.statics.getUserById = getUserById;
 UserSquema.statics.login = login;
+UserSquema.statics.confirmAccount = confirmAccount;
 
 //(modelo, esquema, tabla)
 module.exports = mongoose.model("user", UserSquema, "users");
@@ -55,7 +57,45 @@ function signup(userInfo) {
     .then((user) => user);
 }
 function sendConfirmationAccount(user) {
-  // let transporter = nodemailer.createTransport(transport[, defaults])
+  console.log(user);
+  let transporter = nodemailer.createTransport({
+    host: /**/ process.env.SMTP_HOST /**/ /* "smtp.ionos.es"*/,
+    port: 587,
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+      user: /**/ process.env.SMTP_USE /** "noreply@Movilidadelectrica.club"*/,
+      pass: /**/ process.env.SMTP_HOST /**  "5X8A&DX3kYD$6Yoe4F;dr3"**/,
+    },
+  });
+  //creamos token para enviar el email dentro
+  const token = jwt.sign({ email: user.email }, process.env.SECRET_TOKEN);
+  const urlConfirmation = `${process.env.API_GATEWAY_URL}/account/confirm/${token}`;
+
+  //verificar transporter
+  return transporter.sendMail({
+    from: /**/ process.env.MAIL_ADMIN /**/ /*"desarrollo@click2luck.com"*/,
+    to: user.email,
+    subject: "Please confirm your email.",
+    html: `<p>Confirm your email <a href="${urlConfirmation}">here<a/></p>`,
+  });
+}
+function confirmAccount(token) {
+  let email = null;
+
+  try {
+    const payload = jwt.verify(token, process.env.SECRET_TOKEN);
+    email = payload.email;
+  } catch (error) {
+    throw new Error("invalid token");
+  }
+
+  return this.findOne({ email }).then((user) => {
+    if (!user) throw new Error("user not found");
+    if (user.emailVerified) throw new Error("user already verified");
+
+    user.emailVerified = true;
+    return user.save();
+  });
 }
 function testing(msg) {
   console.log(msg);

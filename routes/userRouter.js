@@ -7,5 +7,6 @@ router.get("/test", userCtrol.testing);
 router.get("/getusers", userCtrol.getUsers);
 router.post("/current-user", userCtrol.getUserById);
 router.post("/login", userCtrol.login);
+router.get("/confirm/:token", userCtrol.confirmAccount);
 
 module.exports = router;
