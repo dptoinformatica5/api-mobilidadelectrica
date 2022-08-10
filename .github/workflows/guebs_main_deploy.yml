@@ -1,0 +1,24 @@
+# name: guebs_main_autodeploy_API_MobilidadElectrica
+
+# on:
+#   push:
+#     branches: [main]
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: SSH Remote Commands
+#         uses: appleboy/ssh-action@v0.1.4
+#         with:
+#           host: ${{ secrets.GUEBS_HOST }}
+#           port: ${{ secrets.GUEBS_PORT }}
+#           username: ${{ secrets.GUEBS_USERNAME }}
+#           password: ${{ secrets.GUEBS_PASSWORD }}
+#           script: |
+#             cd /home/imasdmas/nodejs/apiserenergy
+#             git pull https://${{ secrets.PAT }}@github.com/dptoinformatica5/api-click2luck.git main
+#             npm ci
+#             npm run build
+#             /opt/ruby/bin/passenger-config restart-app /home/imasdmas/nodejs/apiserenergy

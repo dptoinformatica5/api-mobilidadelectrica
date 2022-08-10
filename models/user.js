@@ -63,7 +63,7 @@ function sendConfirmationAccount(user) {
     port: 587,
     secure: false, // upgrade later with STARTTLS
     auth: {
-      user: /**/ process.env.SMTP_USE /** "noreply@Movilidadelectrica.club"*/,
+      user: /**/ process.env.SMTP_USER /** "noreply@Movilidadelectrica.club"*/,
       pass: /**/ process.env.SMTP_HOST /**  "5X8A&DX3kYD$6Yoe4F;dr3"**/,
     },
   });

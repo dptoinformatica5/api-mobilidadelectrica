@@ -3,12 +3,13 @@ const bodyParser = require("body-parser");
 const db_connection = require("./db/db_connection");
 const userRouters = require("./routes/userRouter");
 const app = express();
-
+const { isAuthenticated } = require("./middlewares/index");
 //* Setup *//
 //will help us to retrieve body parameters when handling a request.
 app.use(bodyParser.json());
 
 //* Routes *//
+app.use(isAuthenticated);
 app.use("/account", userRouters);
 app.use((req, res, next) => {
   res.status(404);
