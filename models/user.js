@@ -4,23 +4,26 @@ const { isValidEmail } = require("../helpers");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
-const UserSquema = mongoose.Schema({
-  email: {
-    type: String,
-    require: true,
-    lowercase: true,
-    unique: true,
-    lowercase: true,
+const UserSquema = mongoose.Schema(
+  {
+    email: {
+      type: String,
+      require: true,
+      lowercase: true,
+      unique: true,
+      lowercase: true,
+    },
+    username: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+    },
+    password: { type: String, required: true },
+    emailVerified: { type: Boolean, default: false },
   },
-  username: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-  },
-  password: { type: String, required: true },
-  emailVerified: { type: Boolean, default: false },
-});
+  { timestamps: true }
+ );
 
 //Methods
 UserSquema.statics.signup = signup;

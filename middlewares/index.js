@@ -1,3 +1,3 @@
-const isAuthenticated = require("./isAuthenticated");
+const auth = require("./auth");
 
-module.exports = { isAuthenticated };
+module.exports = { auth };

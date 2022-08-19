@@ -1,4 +1,5 @@
 const getModelByName = require("../db/getModelByName");
+const { createError } = require("../helpers");
 const user = require("../models/user");
 
 module.exports.signup = (req, res) => {
@@ -46,17 +47,11 @@ module.exports.getUsers = (req, res) => {
   }
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { body } = req;
   //comprobar parametros
-  if (!body.email)
-    return res
-      .status(200)
-      .send({ success: false, error: "email not provided" });
-  if (!body.password)
-    return res
-      .status(200)
-      .send({ success: false, error: "password not provided" });
+  if (!body.email) return next(createError(500, "email not provided"));
+  if (!body.password) return next(createError(500, "password not provided"));
 
   const User = getModelByName("user");
 
@@ -65,11 +60,9 @@ module.exports.login = (req, res) => {
       .then((data) => {
         res.status(200).send({ success: true, data });
       })
-      .catch((err) =>
-        res.status(200).send({ success: false, error: err.message })
-      );
+      .catch((err) => next(createError(500, err.message)));
   } catch (err) {
-    res.status(200).send({ success: false, error: err.message });
+    return next(createError(500, err.message));
   }
 };
 
@@ -110,4 +103,20 @@ module.exports.confirmAccount = (req, res) => {
   } catch (err) {
     res.status(200).send({ success: false, error: err.message });
   }
+};
+
+module.exports.getCurrentUser = (req, res) => {
+  //busacmos req.user
+  if (!req.user) return next(createError(500, "user not authorized"));
+  // return res.status(200).send({
+  //   success: false,
+  //   data: { user: null },
+  //   error: "user not authorized",
+  // });
+
+  const User = getModelByName("user");
+
+  return User.getUserById(req.user._id)
+    .then((user) => res.status(200).send({ success: true, data: { user } }))
+    .catch((err) => next(createError(500, err.message)));
 };

@@ -6,6 +6,9 @@ const URI = process.env.MONGO_DB_URI;
 const PORT = process.env.PORT;
 // Conexión a la base de datos (MongoDB Atlas) y arrancar el servidor (Express)
 const db_connection = () => {
+  mongoose.connection.on("disconnected", () => {
+    console.log("mongoDB disconnected!");
+  });
   mongoose
     .connect(URI)
     .then(() => {
