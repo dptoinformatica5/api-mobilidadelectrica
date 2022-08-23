@@ -1,20 +1,25 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const db_connection = require("./db/db_connection");
-const userRouters = require("./routes/userRouter");
+const userRoute = require("./routes/userRoute");
+const authRoute = require("./routes/authRoute");
 const app = express();
+const cookieParser = require("cookie-parser");
 const { auth } = require("./middlewares/index");
-//* Setup *//
+
+//* Setup middlewares*//
 //will help us to retrieve body parameters when handling a request.
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 //* Routes *//
 //app.use(auth); //middleware que verifica el usuario de forma global
-app.use("/account", userRouters);
+app.use("/account", userRoute);
+app.use("/auth", authRoute);
 app.use((req, res, next) => {
   res.status(404);
   res.json({
-    mensaje: "Route not found",
+    message: "Route not found",
   });
 });
 
@@ -22,6 +27,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;
   const errorMessage = err.message || "Something went wrong!";
+  console.log("Error Handler");
   return res.status(errorStatus).json({
     success: false,
     status: errorStatus,

@@ -2,73 +2,24 @@ const getModelByName = require("../db/getModelByName");
 const { createError } = require("../helpers");
 const user = require("../models/user");
 
-module.exports.signup = (req, res) => {
-  const { body } = req;
-  if (!body)
-    return res
-      .status(200)
-      .send({ success: false, error: "user info not found" });
-
-  const User = getModelByName("user");
-  try {
-    User.signup(body)
-      .then(() => {
-        res
-          .status(200)
-          .send({ success: true, message: "successfully signed up" });
-      })
-      .catch((err) =>
-        res.status(200).send({ success: false, error: err.message })
-      );
-  } catch (err) {
-    res.status(500).send({ success: false, error: err.message });
-  }
-};
-
-module.exports.testing = (req, res) => {
+module.exports.testing = (req, res, next) => {
   user.testing("Test");
   res.json({ msg: "This is a test" });
 };
 
-module.exports.getUsers = (req, res) => {
-  try {
-    user
-      .getUsers()
-      .then((users) => {
-        res
-          .status(200)
-          .send({ success: true, message: "successfully", data: users });
-      })
-      .catch((err) =>
-        res.status(200).send({ success: false, error: err.message })
-      );
-  } catch (err) {
-    res.status(500).send({ success: false, error: err.message });
-  }
+module.exports.getUsers = (req, res, next) => {
+  return user
+    .getUsers()
+    .then((users) => {
+      res
+        .status(200)
+        .send({ success: true, message: "successfully", data: users });
+    })
+    .catch((err) => next(createError(500, err.message)));
 };
 
-module.exports.login = (req, res, next) => {
+module.exports.getUserById = (req, res, next) => {
   const { body } = req;
-  //comprobar parametros
-  if (!body.email) return next(createError(500, "email not provided"));
-  if (!body.password) return next(createError(500, "password not provided"));
-
-  const User = getModelByName("user");
-
-  try {
-    User.login(body.email, body.password)
-      .then((data) => {
-        res.status(200).send({ success: true, data });
-      })
-      .catch((err) => next(createError(500, err.message)));
-  } catch (err) {
-    return next(createError(500, err.message));
-  }
-};
-
-module.exports.getUserById = (req, res) => {
-  const { body } = req;
-  console.log("user body", body);
   if (!body)
     return res.status(200).send({
       success: false,
@@ -77,46 +28,78 @@ module.exports.getUserById = (req, res) => {
     });
 
   const User = getModelByName("user");
+
   return User.getUserById(body._id)
     .then((user) => {
       res.status(200).send({ success: true, data: { user } });
     })
-    .catch((err) =>
-      res.status(200).send({ success: false, error: err.message })
-    );
+    .catch((err) => next(createError(500, err.message)));
 };
 
-module.exports.confirmAccount = (req, res) => {
+module.exports.confirmAccount = (req, res, next) => {
   const User = getModelByName("user");
 
-  try {
-    //le pasamos el token
-    User.confirmAccount(req.params.token)
-      .then(() => {
-        res
-          .status(200)
-          .send({ success: true, message: "account confirmed successfully" });
-      })
-      .catch((err) =>
-        res.status(200).send({ success: false, error: err.message })
-      );
-  } catch (err) {
-    res.status(200).send({ success: false, error: err.message });
-  }
+  //le pasamos el token
+  return User.confirmAccount(req.params.token)
+    .then(() => {
+      res
+        .status(200)
+        .send({ success: true, message: "account confirmed successfully" });
+    })
+    .catch((err) => next(createError(500, err.message)));
 };
 
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   //busacmos req.user
   if (!req.user) return next(createError(500, "user not authorized"));
-  // return res.status(200).send({
-  //   success: false,
-  //   data: { user: null },
-  //   error: "user not authorized",
-  // });
 
   const User = getModelByName("user");
 
   return User.getUserById(req.user._id)
     .then((user) => res.status(200).send({ success: true, data: { user } }))
+    .catch((err) => next(createError(500, err.message)));
+};
+
+module.exports.updateUser = (req, res, next) => {
+  if (!req.body) return next(createError(400, "user not provided"));
+  const userId = req.params.id;
+  const User = getModelByName("user");
+
+  User.updateUser(userId, req.body)
+    .then((user) => {
+      if (!user) return next(createError(500, "user not found"));
+
+      const { password, isAdmin, ...otherData } = user._doc;
+      return res.status(201).send({ success: true, data: otherData });
+    })
+    .catch((err) => next(createError(500, err.message)));
+};
+
+module.exports.updatePassword = (req, res, next) => {
+  const { newPassword, oldPassword } = req.body;
+  if (!req.body) return next(createError(400, "password not provided"));
+
+  const userId = req.params.id;
+  const User = getModelByName("user");
+
+  User.updatePassword(userId, oldPassword, newPassword)
+    .then(() => {
+      return res
+        .status(201)
+        .send({ success: true, message: "password updated" });
+    })
+    .catch((err) => next(createError(500, err.message)));
+};
+
+module.exports.deleteAccount = (req, res, next) => {
+  const userId = req.params.id;
+
+  const User = getModelByName("user");
+  User.deleteAccount(userId)
+    .then(() => {
+      return res
+        .status(201)
+        .send({ success: true, message: "account deleted" });
+    })
     .catch((err) => next(createError(500, err.message)));
 };
