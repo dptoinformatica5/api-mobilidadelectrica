@@ -108,7 +108,7 @@ function confirmAccount(token) {
   });
 }
 function testing(msg) {
-  console.log(msg);
+  return msg;
 }
 function getUsers() {
   return this.find().then((users) => users);

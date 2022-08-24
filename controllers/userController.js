@@ -3,8 +3,8 @@ const { createError } = require("../helpers");
 const user = require("../models/user");
 
 module.exports.testing = (req, res, next) => {
-  user.testing("Test");
-  res.json({ msg: "This is a test" });
+  const text = user.testing(req.params.msg);
+  res.send(text);
 };
 
 module.exports.getUsers = (req, res, next) => {

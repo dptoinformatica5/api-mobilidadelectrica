@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const { createError } = require("../helpers");
 //Verifica el usuario y comprueba si el token que nos envia es correcto
 function auth(req, res, next) {
+  //token enviado por el headers
   const access_token = req.headers.access_token;
   if (!access_token) return next(createError(401, "user not authorized"));
 

@@ -5,11 +5,12 @@ const userRoute = require("./routes/userRoute");
 const authRoute = require("./routes/authRoute");
 const app = express();
 const cookieParser = require("cookie-parser");
-const { auth } = require("./middlewares/index");
+// const { auth } = require("./middlewares/index");
 
 //* Setup middlewares*//
 //will help us to retrieve body parameters when handling a request.
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
+app.use(express.json());
 app.use(cookieParser());
 
 //* Routes *//
